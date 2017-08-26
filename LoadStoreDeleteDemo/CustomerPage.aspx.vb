@@ -11,9 +11,20 @@ Public Class CustomerPage
         End Try
     End Sub
 
+    Private Sub ShowGrid()
+        Dim list As New Customers()
+        Database.LoadAll(Of Customer)(list, "")
+        gvwCustomers.DataSource = list
+        gvwCustomers.DataBind()
+    End Sub
+
     Protected Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
         Dim c As New Customer()
-        c.ID = ToInt32(txtID.Text)
+
+        If txtID.Text.IsNumeric() Then
+            c.ID = CInt(txtID.Text)
+        End If
+
         c.Name = txtName.Text
         c.AddressLine1 = txtAddressLine1.Text
         c.AddressLine2 = txtAddressLine2.Text
@@ -27,36 +38,24 @@ Public Class CustomerPage
         ShowGrid()
     End Sub
 
-    Private Sub ShowGrid()
-        Dim list As New Customers()
-        Database.LoadAll(Of Customer)(list, "")
-        gvwCustomers.DataSource = list
-        gvwCustomers.DataBind()
-    End Sub
-
     Protected Sub gvwCustomers_SelectedIndexChanged(sender As Object, e As EventArgs) Handles gvwCustomers.SelectedIndexChanged
-
-        If gvwCustomers.SelectedRow.Cells(1).Text = "" Then Return
-
-        Dim c As New Customer()
-        c.ID = CInt(gvwCustomers.SelectedRow.Cells(1).Text)
-
-        Database.Load(c)
-
-        txtID.Text = c.ID
-        txtName.Text = c.Name
-        txtAddressLine1.Text = c.AddressLine1
-        txtAddressLine2.Text = c.AddressLine2
-        txtCity.Text = c.City
-        txtState.Text = c.State
-        txtZip.Text = c.Zip
-    End Sub
-
-    Private Function ToInt32(value As String)
         Try
-            Return Convert.ToInt32(value)
+            Dim c As New Customer()
+            If gvwCustomers.SelectedRow.Cells(1).Text.IsNumeric() Then
+                c.ID = CInt(gvwCustomers.SelectedRow.Cells(1).Text)
+            End If
+
+            Database.Load(c)
+
+            txtID.Text = c.ID
+            txtName.Text = c.Name
+            txtAddressLine1.Text = c.AddressLine1
+            txtAddressLine2.Text = c.AddressLine2
+            txtCity.Text = c.City
+            txtState.Text = c.State
+            txtZip.Text = c.Zip
         Catch ex As Exception
-            Return 0
+            lblMessage.Text = ex.Message
         End Try
-    End Function
+    End Sub
 End Class
